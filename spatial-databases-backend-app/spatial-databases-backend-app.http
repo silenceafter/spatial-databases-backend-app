@@ -1,0 +1,6 @@
+@spatial_databases_backend_app_HostAddress = http://localhost:5091
+
+GET {{spatial_databases_backend_app_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
