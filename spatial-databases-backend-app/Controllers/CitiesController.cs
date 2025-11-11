@@ -34,7 +34,7 @@ namespace spatial_databases_backend_app.Controllers
         /// <summary>
         /// Получить город с достопримечательностями
         /// </summary>
-        [HttpGet("{id}")]
+        /*[HttpGet("{id}")]
         [ProducesResponseType(typeof(CityDetailDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CityDetailDto>> GetById(int id)
@@ -59,6 +59,22 @@ namespace spatial_databases_backend_app.Controllers
             };
 
             return Ok(dto);
+        }*/
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<CityDto>> GetCity(int id)
+        {
+            var city = await _db.Cities.FindAsync(id);
+            if (city == null) return NotFound();
+
+            // Маппинг уже в памяти → NetTopologySuite.Point.Y/X работают
+            return Ok(new CityDto
+            {
+                Id = city.Id,
+                Name = city.Name,
+                Latitude = city.Location.Y,   // ✅ работает!
+                Longitude = city.Location.X
+            });
         }
     }
 }
