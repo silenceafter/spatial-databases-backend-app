@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite;
 using spatial_databases_backend_app.Dto;
 
@@ -45,6 +46,34 @@ namespace spatial_databases_backend_app.Controllers
                 })
                 .ToList();
 
+            return Ok(result);
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<List<POIDto>>> SearchByName(
+            [FromQuery] string? query,
+            [FromQuery] int limit = 20)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return Ok(new List<POIDto>());
+            }
+
+            var safeQuery = "%" + query + "%";
+            var pois = await _db.PointsOfInterest
+                .Where(p => p.CityId == 1 &&
+                    EF.Functions.ILike(p.Name, safeQuery))
+                .Take(limit)
+                .ToListAsync();
+            //
+            var result = pois.Select(p => new POIDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Latitude = p.Location.Y,
+                Longitude = p.Location.X,
+                Category = p.Category ?? "other"
+            }).ToList();
             return Ok(result);
         }
     }
